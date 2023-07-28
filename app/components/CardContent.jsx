@@ -10,7 +10,7 @@ export default function CardContent({product, buttonRefs}) {
   }
   // Trimmed description
   const trimmedDescription = trimDescription(product.descriptionHtml, 150); // Change 100 to your desired character limit
-
+ 
   return (
     <div className='tinder-content'>
       <div 
