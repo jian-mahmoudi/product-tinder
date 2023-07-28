@@ -17,6 +17,8 @@ import resetStyles from './styles/reset.css';
 import appStyles from './styles/app.css';
 import {Layout} from '~/components/Layout';
 
+import { useLocation } from 'react-router-dom';
+
 export function links() {
   return [
     {rel: 'stylesheet', href: resetStyles},
@@ -77,6 +79,16 @@ export async function loader({context}) {
 
 export default function App() {
   const data = useLoaderData();
+  const location = useLocation();
+  const showFooter = location.pathname !== '/'; // Don't show footer if on homepage
+  const isHomePage = location.pathname === '/'; // Check if on homepage
+
+  const bodyStyle = isHomePage ? {
+    overflow: 'hidden',
+    margin: 0,
+    minWidth: '320px',
+    minHeight: '100vh'
+  } : {};
 
   return (
     <html lang="en">
@@ -86,8 +98,8 @@ export default function App() {
         <Meta />
         <Links />
       </head>
-      <body>
-        <Layout {...data}>
+      <body style={bodyStyle}>
+        <Layout {...data} showFooter={showFooter}>
           <Outlet />
         </Layout>
         <ScrollRestoration />

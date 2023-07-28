@@ -2,6 +2,7 @@ import {defer} from '@shopify/remix-oxygen';
 import {Await, useLoaderData, Link} from '@remix-run/react';
 import {Suspense} from 'react';
 import {Image, Money} from '@shopify/hydrogen';
+import ProductTinder from '~/components/ProductTinder';
 
 export const meta = () => {
   return [{title: 'Hydrogen | Home'}];
@@ -12,16 +13,17 @@ export async function loader({context}) {
   const {collections} = await storefront.query(FEATURED_COLLECTION_QUERY);
   const featuredCollection = collections.nodes[0];
   const recommendedProducts = storefront.query(RECOMMENDED_PRODUCTS_QUERY);
-
-  return defer({featuredCollection, recommendedProducts});
+  const productsTinder = storefront.query(COLLECTION_QUERY);
+  
+  return defer({featuredCollection, recommendedProducts, productsTinder});
 }
 
 export default function Homepage() {
   const data = useLoaderData();
   return (
     <div className="home">
-      <FeaturedCollection collection={data.featuredCollection} />
-      <RecommendedProducts products={data.recommendedProducts} />
+      <h1 style={{ textAlign: 'center', marginTop: '0px'}}>🔥 product tinder</h1>
+      <ProductTinder products={data.productsTinder} />
     </div>
   );
 }
@@ -130,3 +132,69 @@ const RECOMMENDED_PRODUCTS_QUERY = `#graphql
     }
   }
 `;
+
+const COLLECTION_QUERY = `#graphql
+fragment RecommendedProduct on Product {
+  id
+  title
+  handle
+  descriptionHtml
+  tags
+  priceRange {
+    minVariantPrice {
+      amount
+      currencyCode
+    }
+  }
+  images(first: 1) {
+    nodes {
+      id
+      url
+      altText
+      width
+      height
+    }
+  }
+  variants(first: 5) {
+    nodes {
+      id
+      availableForSale
+      compareAtPrice {
+        amount
+        currencyCode
+      }
+      image {
+        id
+        url
+        altText
+        width
+        height
+      }
+      price {
+        amount
+        currencyCode
+      }
+      quantityAvailable
+      selectedOptions {
+        name
+        value
+      }
+      sku
+      title
+      unitPrice {
+        amount
+        currencyCode
+      }
+    }
+  }
+}
+
+query RecommendedProducts ($country: CountryCode, $language: LanguageCode)
+  @inContext(country: $country, language: $language) {
+  products(first: 250, sortKey: UPDATED_AT, reverse: false) {
+    nodes {
+      ...RecommendedProduct
+    }
+  }
+}
+`
